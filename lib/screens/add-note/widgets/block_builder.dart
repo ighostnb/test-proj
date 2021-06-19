@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:test_proj/models/task_model.dart';
 
 class BlockBuilder extends StatelessWidget {
+  final Random r = Random();
   final List<TaskModel> tasks;
   BlockBuilder({required this.tasks});
   @override
@@ -12,8 +15,12 @@ class BlockBuilder extends StatelessWidget {
         crossAxisCount: 4,
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
-        itemBuilder: (context, index) => Container(
-          color: Colors.teal.withOpacity(0.5),
+        itemBuilder: (context, index) => Card(
+          elevation: 7,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          color: _getCardColor(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -30,5 +37,12 @@ class BlockBuilder extends StatelessWidget {
             ],
           ),
         ),
+      );
+
+  Color _getCardColor() => Color.fromARGB(
+        r.nextInt(255),
+        r.nextInt(255),
+        r.nextInt(255),
+        r.nextInt(255),
       );
 }

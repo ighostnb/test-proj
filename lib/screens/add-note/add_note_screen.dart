@@ -11,6 +11,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   final TextEditingController _text = TextEditingController();
   bool _isShowTime = false;
   bool _isChangesSave = true;
+  final FocusNode _focus = FocusNode();
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -50,6 +51,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         ),
         elevation: 3,
         child: TextField(
+          focusNode: _focus,
           onChanged: (value) => _isShowTime = false,
           controller: _title,
           decoration: InputDecoration(
@@ -68,6 +70,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextField(
+            focusNode: _focus,
             onChanged: (value) => _isShowTime = false,
             controller: _text,
             maxLength: 255,
@@ -89,6 +92,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             time: DateTime.now().millisecondsSinceEpoch,
           );
           _isChangesSave = true;
+          _focus.unfocus();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Note saved successfully'),
