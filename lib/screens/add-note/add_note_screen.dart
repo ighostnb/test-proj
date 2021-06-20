@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:test_proj/database/app_database.dart';
 
 class AddNoteScreen extends StatefulWidget {
+  final transitionAnimation;
+  AddNoteScreen(this.transitionAnimation);
   @override
   _AddNoteScreenState createState() => _AddNoteScreenState();
 }
@@ -11,14 +13,28 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   final TextEditingController _text = TextEditingController();
   bool _isShowTime = false;
   bool _isChangesSave = true;
-  final FocusNode _focus = FocusNode();
+  final FocusNode _focusTitle = FocusNode();
+  final FocusNode _focusText = FocusNode();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: _buildAppBar(),
-        body: _buildBody(),
-        floatingActionButton: _buildSaveButton(context),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: widget.transitionAnimation,
+        builder: (context, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(1, 0),
+              end: Offset(0, 0),
+            ).animate(widget.transitionAnimation),
+            child: child,
+          );
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: _buildBody(),
+          floatingActionButton: _buildSaveButton(context),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+        ),
       );
 
   AppBar _buildAppBar() => AppBar(
@@ -51,7 +67,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         ),
         elevation: 3,
         child: TextField(
-          focusNode: _focus,
+          focusNode: _focusTitle,
           onChanged: (value) => _isShowTime = false,
           controller: _title,
           decoration: InputDecoration(
@@ -70,7 +86,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextField(
-            focusNode: _focus,
+            focusNode: _focusText,
             onChanged: (value) => _isShowTime = false,
             controller: _text,
             maxLength: 255,
@@ -85,19 +101,21 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   Widget _buildSaveButton(BuildContext context) => InkWell(
         onTap: () {
-          AppDatabase().addTask(
+          AppDatabase().addNote(
             title: _title.text,
             text: _text.text,
             isShowTime: _isShowTime,
             time: DateTime.now().millisecondsSinceEpoch,
           );
           _isChangesSave = true;
-          _focus.unfocus();
+          _focusTitle.unfocus();
+          _focusText.unfocus();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Note saved successfully'),
             ),
           );
+          Navigator.pop(context);
         },
         child: Container(
           color: Colors.blue,

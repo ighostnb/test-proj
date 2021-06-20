@@ -14,7 +14,7 @@ class AppDatabase {
     await Hive.openBox<TaskModel>('task');
   }
 
-  void addTask({
+  void addNote({
     required String title,
     required String text,
     required bool isShowTime,
@@ -26,6 +26,11 @@ class AppDatabase {
       ..title = title
       ..time = time;
     final box = Boxes.getTask();
-    box.add(_task);
+    box.put('$time', _task);
+  }
+
+  void removeNote(int time) {
+    final box = Boxes.getTask();
+    box.delete('$time');
   }
 }

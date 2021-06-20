@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_proj/database/app_database.dart';
 
-import 'screens/note/task_screen.dart';
+import 'screens/note/note_screen.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: TaskScreen(),
+        home: NoteScreen(),
       );
 }
