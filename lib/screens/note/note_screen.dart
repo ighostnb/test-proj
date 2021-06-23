@@ -14,6 +14,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   bool _visibleList = true;
+  bool _visible = true;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -31,20 +32,28 @@ class _NoteScreenState extends State<NoteScreen> {
             padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
             child: Stack(
               children: [
-                AbsorbPointer(
-                  absorbing: _visibleList ? true : false,
-                  child: AnimatedOpacity(
-                    opacity: _visibleList ? 0 : 1,
-                    duration: Duration(seconds: 1),
-                    child: BlockBuilder(tasks: tasks),
+                Visibility(
+                  visible: _visible ? true : false,
+                  child: AbsorbPointer(
+                    absorbing: _visibleList ? false : true,
+                    child: AnimatedOpacity(
+                      child: ListBuilder(tasks: tasks),
+                      duration: Duration(seconds: 1),
+                      opacity: _visibleList ? 1 : 0,
+                      onEnd: () => setState(() => _visible = !_visible),
+                    ),
                   ),
                 ),
-                AbsorbPointer(
-                  absorbing: _visibleList ? false : true,
-                  child: AnimatedOpacity(
-                    child: ListBuilder(tasks: tasks),
-                    duration: Duration(seconds: 1),
-                    opacity: _visibleList ? 1 : 0,
+                Visibility(
+                  visible: _visible ? false : true,
+                  child: AbsorbPointer(
+                    absorbing: _visibleList ? true : false,
+                    child: AnimatedOpacity(
+                      opacity: _visibleList ? 0 : 1,
+                      duration: Duration(seconds: 1),
+                      child: BlockBuilder(tasks: tasks),
+                      onEnd: () => setState(() => _visible = !_visible),
+                    ),
                   ),
                 ),
               ],
@@ -74,7 +83,7 @@ class _NoteScreenState extends State<NoteScreen> {
         onPressed: () => Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) {
-              return AddNoteScreen(animation);
+              return AddNoteScreen(animation, null);
             },
             transitionDuration: Duration(milliseconds: 400),
           ),

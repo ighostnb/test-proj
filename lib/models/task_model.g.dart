@@ -14,7 +14,8 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..title = fields[0] as String
       ..text = fields[1] as String
       ..time = fields[2] as int
-      ..isShowTime = fields[3] as bool;
+      ..isShowTime = fields[3] as bool
+      ..id = fields[4] as String;
   }
 
   @override
@@ -28,7 +29,9 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(2)
       ..write(obj.time)
       ..writeByte(3)
-      ..write(obj.isShowTime);
+      ..write(obj.isShowTime)
+      ..writeByte(4)
+      ..write(obj.id);
   }
 
   @override

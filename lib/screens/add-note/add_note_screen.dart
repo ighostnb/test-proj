@@ -3,7 +3,8 @@ import 'package:test_proj/database/app_database.dart';
 
 class AddNoteScreen extends StatefulWidget {
   final transitionAnimation;
-  AddNoteScreen(this.transitionAnimation);
+  final List? note;
+  AddNoteScreen(this.transitionAnimation, this.note);
   @override
   _AddNoteScreenState createState() => _AddNoteScreenState();
 }
@@ -24,6 +25,11 @@ class _AddNoteScreenState extends State<AddNoteScreen>
   @override
   initState() {
     super.initState();
+    if (widget.note != null) {
+      _title.text = widget.note![0];
+      _text.text = widget.note![1];
+      _isShowTime = widget.note![2];
+    }
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -190,13 +196,14 @@ class _AddNoteScreenState extends State<AddNoteScreen>
 
   void _saveNote() {
     AppDatabase().addNote(
+      id: widget.note == null ? AppDatabase().getRandomId(15) : widget.note![4],
       title: _title.text,
       text: _text.text,
       isShowTime: _isShowTime,
       time: DateTime.now().millisecondsSinceEpoch,
     );
-    _isChangesSave = true;
 
+    _isChangesSave = true;
     _focusTitle.unfocus();
     _focusText.unfocus();
     _hideSnackBars();

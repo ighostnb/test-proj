@@ -15,4 +15,7 @@ class TaskModel extends HiveObject {
 
   @HiveField(3)
   late bool isShowTime;
+
+  @HiveField(4)
+  late String id;
 }

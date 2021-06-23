@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:test_proj/models/task_model.dart';
+import 'package:test_proj/screens/add-note/add_note_screen.dart';
 
 class BlockBuilder extends StatelessWidget {
   final Random r = Random();
-  final List<TaskModel> tasks;
+  final tasks;
   BlockBuilder({required this.tasks});
   @override
   Widget build(BuildContext context) => StaggeredGridView.countBuilder(
@@ -15,12 +15,29 @@ class BlockBuilder extends StatelessWidget {
         crossAxisCount: 4,
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
-        itemBuilder: (context, index) => Card(
-          elevation: 7,
-          shape: RoundedRectangleBorder(
+        itemBuilder: (context, index) => _buildItem(index, context),
+      );
+
+  Widget _buildItem(index, context) => InkWell(
+        onTap: () => Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return AddNoteScreen(animation, [
+                tasks[index].title,
+                tasks[index].text,
+                tasks[index].isShowTime,
+                tasks[index].time,
+                tasks[index].id,
+              ]);
+            },
+            transitionDuration: Duration(milliseconds: 400),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _getCardColor(),
             borderRadius: BorderRadius.circular(8),
           ),
-          color: _getCardColor(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
