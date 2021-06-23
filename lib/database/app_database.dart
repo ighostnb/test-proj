@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_proj/database/boxes.dart';
+import 'package:test_proj/helper/start_notes.dart';
 import 'package:test_proj/models/task_model.dart';
 import 'dart:math';
 
@@ -19,6 +21,12 @@ class AppDatabase {
 
     Hive.registerAdapter(TaskModelAdapter());
     await Hive.openBox<TaskModel>('task');
+
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    if (_prefs.getBool('first_start') == null) {
+      StartNotes.addStartNotes();
+      _prefs.setBool('first_start', true);
+    }
   }
 
   void addNote({

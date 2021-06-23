@@ -47,15 +47,13 @@ class _AddNoteScreenState extends State<AddNoteScreen>
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: widget.transitionAnimation,
-        builder: (context, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(1, 0),
-              end: Offset(0, 0),
-            ).animate(widget.transitionAnimation),
-            child: child,
-          );
-        },
+        builder: (context, child) => SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(1, 0),
+            end: Offset(0, 0),
+          ).animate(widget.transitionAnimation),
+          child: child,
+        ),
         child: WillPopScope(
           onWillPop: () => _onWillPop(context),
           child: Scaffold(
@@ -84,6 +82,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
         ),
         elevation: 3,
         child: TextField(
+          maxLength: 25,
           focusNode: _focusTitle,
           onChanged: (value) {
             _isChangesSave = false;

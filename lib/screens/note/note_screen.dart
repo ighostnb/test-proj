@@ -28,6 +28,7 @@ class _NoteScreenState extends State<NoteScreen> {
         valueListenable: Boxes.getTask().listenable(),
         builder: (context, box, _) {
           final tasks = box.values.toList().cast<TaskModel>();
+
           return Padding(
             padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
             child: Stack(
