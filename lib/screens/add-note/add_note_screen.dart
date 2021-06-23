@@ -8,13 +8,35 @@ class AddNoteScreen extends StatefulWidget {
   _AddNoteScreenState createState() => _AddNoteScreenState();
 }
 
-class _AddNoteScreenState extends State<AddNoteScreen> {
+class _AddNoteScreenState extends State<AddNoteScreen>
+    with TickerProviderStateMixin {
   final TextEditingController _title = TextEditingController();
   final TextEditingController _text = TextEditingController();
+
   bool _isShowTime = false;
   bool _isChangesSave = true;
   final FocusNode _focusTitle = FocusNode();
   final FocusNode _focusText = FocusNode();
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+      value: 0.1,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.ease);
+  }
+
+  @override
+  dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
@@ -28,27 +50,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             child: child,
           );
         },
-        child: Scaffold(
-          appBar: _buildAppBar(),
-          body: _buildBody(),
-          floatingActionButton: _buildSaveButton(context),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+        child: WillPopScope(
+          onWillPop: () => _onWillPop(context),
+          child: Scaffold(
+            appBar: _buildAppBar(),
+            body: _buildBody(),
+          ),
         ),
       );
 
-  AppBar _buildAppBar() => AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            if (_isChangesSave) {
-              Navigator.pop(context);
-            } else {}
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-        title: Text('Add note'),
-        centerTitle: true,
-      );
+  AppBar _buildAppBar() => AppBar();
 
   Widget _buildBody() => Padding(
         padding: const EdgeInsets.only(top: 15, right: 15, left: 15),
@@ -68,7 +79,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         elevation: 3,
         child: TextField(
           focusNode: _focusTitle,
-          onChanged: (value) => _isShowTime = false,
+          onChanged: (value) {
+            _isChangesSave = false;
+            _showSaveButton();
+          },
           controller: _title,
           decoration: InputDecoration(
             border: InputBorder.none,
@@ -87,7 +101,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
           ),
           child: TextField(
             focusNode: _focusText,
-            onChanged: (value) => _isShowTime = false,
+            onChanged: (value) {
+              _isChangesSave = false;
+              _showSaveButton();
+            },
             controller: _text,
             maxLength: 255,
             maxLines: 8,
@@ -99,39 +116,24 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         ),
       );
 
-  Widget _buildSaveButton(BuildContext context) => InkWell(
-        onTap: () {
-          AppDatabase().addNote(
-            title: _title.text,
-            text: _text.text,
-            isShowTime: _isShowTime,
-            time: DateTime.now().millisecondsSinceEpoch,
-          );
-          _isChangesSave = true;
-          _focusTitle.unfocus();
-          _focusText.unfocus();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Note saved successfully'),
-            ),
-          );
-          Navigator.pop(context);
-        },
-        child: Container(
-          color: Colors.blue,
-          height: 50,
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 21,
-              ),
+  void _showSaveButton() {
+    _hideSnackBars();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.blue,
+        content: InkWell(
+          onTap: _saveNote,
+          child: Container(
+            height: 50,
+            child: Center(
+              child: Text('Save'),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildCheckBox() => Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -139,8 +141,69 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
           Text('Show time'),
           Checkbox(
             value: _isShowTime,
-            onChanged: (_) => setState(() => _isShowTime = !_isShowTime),
+            onChanged: (_) {
+              setState(() => _isShowTime = !_isShowTime);
+              _isChangesSave = false;
+              _showSaveButton();
+            },
           ),
         ],
       );
+
+  Future<bool> _onWillPop(context) async {
+    if (_isChangesSave) {
+      return true;
+    }
+    _controller.reset();
+    _controller.forward();
+
+    return await showDialog(
+          context: context,
+          builder: (context) {
+            _hideSnackBars();
+
+            return ScaleTransition(
+              scale: _animation,
+              child: AlertDialog(
+                title: Text('Do you want to save your changes?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _saveNote();
+                      Navigator.pop(context, true);
+                    },
+                    child: Text('Yes'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('No'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ) ??
+        false;
+  }
+
+  void _hideSnackBars() => ScaffoldMessenger.of(context).clearSnackBars();
+
+  void _saveNote() {
+    AppDatabase().addNote(
+      title: _title.text,
+      text: _text.text,
+      isShowTime: _isShowTime,
+      time: DateTime.now().millisecondsSinceEpoch,
+    );
+    _isChangesSave = true;
+
+    _focusTitle.unfocus();
+    _focusText.unfocus();
+    _hideSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Note saved successfully'),
+      ),
+    );
+  }
 }

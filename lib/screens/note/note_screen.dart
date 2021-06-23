@@ -13,7 +13,7 @@ class NoteScreen extends StatefulWidget {
 }
 
 class _NoteScreenState extends State<NoteScreen> {
-  bool _listView = true;
+  bool _visibleList = true;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -29,9 +29,26 @@ class _NoteScreenState extends State<NoteScreen> {
           final tasks = box.values.toList().cast<TaskModel>();
           return Padding(
             padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: _listView
-                ? ListBuilder(tasks: tasks)
-                : BlockBuilder(tasks: tasks),
+            child: Stack(
+              children: [
+                AbsorbPointer(
+                  absorbing: _visibleList ? true : false,
+                  child: AnimatedOpacity(
+                    opacity: _visibleList ? 0 : 1,
+                    duration: Duration(seconds: 1),
+                    child: BlockBuilder(tasks: tasks),
+                  ),
+                ),
+                AbsorbPointer(
+                  absorbing: _visibleList ? false : true,
+                  child: AnimatedOpacity(
+                    child: ListBuilder(tasks: tasks),
+                    duration: Duration(seconds: 1),
+                    opacity: _visibleList ? 1 : 0,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       );
@@ -40,7 +57,7 @@ class _NoteScreenState extends State<NoteScreen> {
         title: Text('Notes'),
         centerTitle: true,
         leading: GestureDetector(
-          onTap: () => setState(() => _listView = !_listView),
+          onTap: () => setState(() => _visibleList = !_visibleList),
           child: Icon(
             Icons.app_registration_sharp,
             size: 35,
@@ -59,7 +76,7 @@ class _NoteScreenState extends State<NoteScreen> {
             pageBuilder: (context, animation, secondaryAnimation) {
               return AddNoteScreen(animation);
             },
-            transitionDuration: Duration(milliseconds: 500),
+            transitionDuration: Duration(milliseconds: 400),
           ),
         ),
       );
