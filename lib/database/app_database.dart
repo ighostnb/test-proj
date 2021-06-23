@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:test_proj/database/boxes.dart';
 import 'package:test_proj/models/task_model.dart';
 import 'dart:math';
@@ -11,8 +14,8 @@ class AppDatabase {
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
   Future initDatabase() async {
-    // Directory? dir = await getExternalStorageDirectory();
-    // Hive.init(dir!.path);
+    Directory? dir = await getExternalStorageDirectory();
+    Hive.init(dir!.path);
 
     Hive.registerAdapter(TaskModelAdapter());
     await Hive.openBox<TaskModel>('task');
